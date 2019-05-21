@@ -11,6 +11,16 @@ build/
 # Experiments
 tmp/
 *.pkl
+dataset/
+initial_test/
+interpretation_test/
+pairwise_distance/
+sparsity_diff/
+sparsity_test/
+
+models_cluster_droprate/
+models_cluster_twitter/
+
 
 # Jupyter notebook
 .ipynb_checkpoints/
