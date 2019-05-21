@@ -68,18 +68,16 @@ def silhouette_index(x, labels, centroids):
     print('\rsilhouette was done {0}/{0} ...'.format(n_clusters))
     return silhouette / x.shape[0]
 
-def main():
-    table_path = 'clustering_quality.txt'
+def initializer_test():
+    expname = 'initial_test'
+    table_path = 'clustering_quality_initializer.txt'
     header = '\t'.join(['dataname', 'setting', 'intra', 'inter', 'silhouette']) + '\n'
     write(table_path, header)
 
     for didx in range(1, 8):
         dataname = 'd%d' % didx
-
         datapath = '../dataset/{}.mtx'.format(dataname)
         x = mmread(datapath).tocsr()
-
-        expname = 'initial_test'
         label_paths = glob('{}/{}/*/*iter10.txt'.format(expname, dataname))
 
         for i, label_path in enumerate(label_paths):
@@ -94,8 +92,18 @@ def main():
 
             message = '{}\t{}\t{}\t{}\t{}\n'.format(dataname, setting, intra, inter, silhouette)
             write(table_path, message)
+        #break # break for dataset
 
-        expname = 'sparsity_test'
+def sparsity_test():
+    expname = 'sparsity_test'
+    table_path = 'clustering_quality_sparsity.txt'
+    header = '\t'.join(['dataname', 'setting', 'intra', 'inter', 'silhouette', 'centroid_silhouette']) + '\n'
+    write(table_path, header)
+
+    for didx in range(1, 8):
+        dataname = 'd%d' % didx
+        datapath = '../dataset/{}.mtx'.format(dataname)
+        x = mmread(datapath).tocsr()
         label_paths = glob('{}/{}/*/*iter10.txt'.format(expname, dataname))
 
         for i, label_path in enumerate(label_paths):
@@ -103,14 +111,22 @@ def main():
             setting = get_setting(label_path)
 
             labels = load_labels(label_path)
-            centroid_path = label_path.rsplit('/', 1)[0] + '/cluster_centers_sparse.pkl'
-            centroids = load_centroids(centroid_path)
+            centroids = create_centroids(x, labels)
 
             intra, inter = intra_inter_cluster_distance(x, labels, centroids)
             silhouette = silhouette_index(x, labels, centroids)
 
-            message = '{}\t{}\t{}\t{}\t{}\n'.format(dataname, setting, intra, inter, silhouette)
+            centroid_path = label_path.rsplit('/', 1)[0] + '/cluster_centers_sparse.pkl'
+            centroids = load_centroids(centroid_path)
+            centroid_silhouette = silhouette_index(x, labels, centroids)
+
+            message = '{}\t{}\t{}\t{}\t{}\t{}\n'.format(dataname, setting, intra, inter, silhouette, centroid_silhouette)
             write(table_path, message)
+        #break # break for dataset
+
+def main():
+    initializer_test()
+    sparsity_test()
 
 if __name__ == '__main__':
     main()
